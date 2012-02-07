@@ -9,7 +9,7 @@ end
 
 desc "Build the annotated source HTML"
 task :docco do
-  `docco backbone.marionette.js`
+  `docco backbone.socketsync.js`
   `git add -A`
   `git stash`
   `git checkout gh-pages`
