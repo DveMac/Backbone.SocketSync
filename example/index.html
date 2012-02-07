@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Backbone Boilerplate</title>
+</head>
+
+<body>
+  <!-- Main container -->
+  <div role="main" id="main"></div>
+
+  <!-- Libraries -->
+  <script src="/javascripts/underscore.js"></script>
+  <script src="/javascripts/backbone.js"></script>
+  <script src="/javascripts/backbone.socketsync.js"></script>
+
+  <!-- Application -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script type="text/javascript">
+
+    Backbone.sync = Backbone.SocketSync.createSync(io.connect('http://localhost:3000'));
+
+    var Note = Backbone.Model.extend({
+      title: ''
+    });
+
+    var Notes = Backbone.Collection.extend({
+      url: '/notes',
+      model: Note
+    });
+
+    var notePad = new Notes;
+
+    var testModel = notePad.create({
+      title: 'cats!'
+    });
+
+    testModel.destroy();
+
+  </script>
+
+</body>
+</html>

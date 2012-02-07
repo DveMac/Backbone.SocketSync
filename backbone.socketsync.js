@@ -18,7 +18,7 @@ Backbone.SocketSync = (function(backbone, _){
 	var signature = function (model) {
 		var sig = {};   
 
-		sig.endPoint = model.url + (model.id ? ('/' + model.id) : '');
+		sig.endPoint = model.url() + (model.id ? ('/' + model.id) : '');
 		if (model.ctx) sig.ctx = model.ctx;
 
 		return sig;
