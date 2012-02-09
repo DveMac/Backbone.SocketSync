@@ -6,6 +6,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <title>Backbone Boilerplate</title>
+
+  <style type="text/css">
+    .fL{
+      float:left;
+    }
+    .pd10{
+      padding: 10px;
+    }
+    .pd5{
+      padding: 5px;
+    }
+    .hdn{
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
@@ -13,35 +28,47 @@
   <div role="main" id="main"></div>
 
   <!-- Libraries -->
+  <script src="/javascripts/jquery-1.7.1.js"></script>
   <script src="/javascripts/underscore.js"></script>
   <script src="/javascripts/backbone.js"></script>
+  <script src="/javascripts/backbone.modelbinding.js"></script>
   <script src="/javascripts/backbone.socketsync.js"></script>
 
   <!-- Application -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/client.js"></script>
 
   <script type="text/javascript">
 
     Backbone.sync = Backbone.SocketSync.createSync(io.connect('http://localhost:3000'));
 
-    var Note = Backbone.Model.extend({
-      title: ''
+
+    $(document).ready(function(){
+      var noteView = new NoteListView();
+
     });
 
-    var Notes = Backbone.Collection.extend({
-      url: '/notes',
-      model: Note
-    });
-
-    var notePad = new Notes;
-
-    var testModel = notePad.create({
-      title: 'cats!'
-    });
-
-    testModel.destroy();
 
   </script>
+
+  <div id="note_view" class="hdn">
+    <div class="fL pd10">
+    <label for="title">Title:</label>
+    <input id="note_title" data-bind="value title" type="textbox"></input>    
+    </div>
+    <div class="fL pd10">
+    <label for="content">Content:</label>
+    <input id="note_content" data-bind="value content" type="textbox"></input>
+    </div>
+    <div class="pd10">
+    <button id="note_save_button">Save</button>
+    </div>
+  </div>
+
+  <div id="note_list_view" class="hdn">
+    <button id="note_add_button">Add Note</button>
+    <ul></ul>
+  </div>
 
 </body>
 </html>
