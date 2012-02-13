@@ -55,12 +55,13 @@ var socketCommands = [
 	{
 		name: 'update',
 		handler: function(data){
+			var rec = {};
 			_.each(database, function(r,i,l){
 				if(r.id == data.item.id){
-					_.extend(l[i],data.item);
+					rec = _.extend(l[i],data.item);
 				}
 			});
-			return {success : true};
+			return rec;
 		}
 	},
 	{
@@ -74,7 +75,7 @@ var socketCommands = [
 var event = function (operation, sig) {
 	var e = operation + ':' + sig.endPoint;
 	if (sig.ctx) e += (':' + sig.ctx);
-
+console.log(e);
 	return e;
 };
 
@@ -83,7 +84,11 @@ io.sockets.on('connection', function (socket) {
 		socket.on(command.name, function(data){
 			var e = event(command.name, data.signature);
 			delete data.signature;
-			socket.emit(e, command.handler(data));    
+			var response = command.handler(data);
+			socket.emit(e, response); 
+			if(command.name !== 'read'){
+				socket.broadcast.emit('broadcast', response);   
+			}
 		});
 	}, this);           
 });

@@ -13,7 +13,8 @@ Backbone.SocketSync = (function(backbone, _){
 		io = window.io;
 	}
 
-	var urlRegex = /^(https?:\/\/)[a-zA-Z0-9\.\:\/]*$/;
+	var urlRegex = /^(https?:\/\/)[a-zA-Z0-9\.\:\/]*$/,
+			overrideKey = '__socketsync';
 
 	var signature = function (model) {
 		var sig = {},
@@ -26,8 +27,7 @@ Backbone.SocketSync = (function(backbone, _){
 	};
 
 	var event = function (operation, sig) {
-		var e = operation + ':';
-		e += sig.endPoint;
+		var e = operation + ':' + sig.endPoint;
 		if (sig.ctx) e += (':' + sig.ctx);
 
 		return e;
@@ -52,8 +52,27 @@ Backbone.SocketSync = (function(backbone, _){
 	};
 
 	var isOverridden = function(scope){
-		return (scope.sync || Backbone.sync).hasOwnProperty('__socketsync');
+		return (scope.sync || backbone.sync).hasOwnProperty(overrideKey);
 	}
+
+	var wrapBackbone = function(){
+		_.extend(backbone.Model.prototype, {
+			save: _.wrap(backbone.Model.prototype.save, function(func,key,value,options){
+				if (isOverridden(this)){
+					(options || value || (value = {})).wait = true;
+				}
+
+				return func.apply(this, [key, value, options]);	
+			}),
+			destroy: _.wrap(backbone.Model.prototype.destroy, function(func,options){
+				if (isOverridden(this)){
+					(options || (options = {})).wait = true;
+				}
+
+				return func.apply(this, [options]);	
+			})	
+		});
+	};
 
 	// createSync
 	// --------------
@@ -74,21 +93,10 @@ Backbone.SocketSync = (function(backbone, _){
 			throw getError("NoSocketError", "Invalid socket object");
 		}
 
-		_.extend(Backbone.Model.prototype, {
-			save: _.wrap(Backbone.Model.prototype.save, function(func,key,value,options){
-				if (isOverridden(this)){
-					(options || value || (value = {})).wait = true;
-				}
+		wrapBackbone();
 
-				return func.apply(this, [key, value, options]);	
-			}),
-			destroy: _.wrap(Backbone.Model.prototype.destroy, function(func,options){
-				if (isOverridden(this)){
-					(options || (options = {})).wait = true;
-				}
-
-				return func.apply(this, [options]);	
-			})	
+		iosocket.on('broadcast', function(data){
+			console.log(data);
 		});
 
 		var syncMethod = function (method, model, options) {
